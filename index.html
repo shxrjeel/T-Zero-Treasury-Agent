@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>T-Zero Treasury Router — AP2 Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:        #0a0e1a;
+      --surface:   #111827;
+      --surface2:  #1a2236;
+      --border:    #1e3a5f;
+      --accent:    #00d4ff;
+      --accent2:   #7c3aed;
+      --green:     #10b981;
+      --red:       #ef4444;
+      --amber:     #f59e0b;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --font:      'Inter', 'Segoe UI', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      padding: 0 0 40px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, #0d1b2e 0%, #0a1628 60%, #0d1b2e 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 22px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .logo {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 900; color: #fff;
+      flex-shrink: 0;
+    }
+    .header-title h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+    .header-title p  { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+    .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .badge {
+      padding: 4px 12px; border-radius: 20px; font-size: 0.72rem;
+      font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red);   border: 1px solid rgba(239,68,68,0.3); }
+    .badge-green  { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+    .badge-amber  { background: rgba(245,158,11,0.15); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
+    .badge-blue   { background: rgba(0,212,255,0.12);  color: var(--accent); border: 1px solid rgba(0,212,255,0.25); }
+    .timestamp { font-size: 0.72rem; color: var(--muted); }
+
+    /* ── MAIN LAYOUT ── */
+    main { max-width: 1400px; margin: 0 auto; padding: 32px 40px 0; }
+
+    /* ── ALERT BANNER ── */
+    .alert {
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-left: 4px solid var(--red);
+      border-radius: 8px;
+      padding: 14px 20px;
+      margin-bottom: 28px;
+      display: flex; align-items: center; gap: 12px;
+      font-size: 0.85rem;
+    }
+    .alert-icon { font-size: 1.2rem; }
+    .alert strong { color: var(--red); }
+
+    /* ── KPI CARDS ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 22px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: default;
+    }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+    .kpi-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .kpi-card.green::before  { background: linear-gradient(90deg, var(--green), #34d399); }
+    .kpi-card.red::before    { background: linear-gradient(90deg, var(--red), #f87171); }
+    .kpi-card.blue::before   { background: linear-gradient(90deg, var(--accent), #38bdf8); }
+    .kpi-card.purple::before { background: linear-gradient(90deg, var(--accent2), #a78bfa); }
+    .kpi-card.amber::before  { background: linear-gradient(90deg, var(--amber), #fcd34d); }
+    .kpi-label {
+      font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px;
+    }
+    .kpi-value {
+      font-size: 1.85rem; font-weight: 800; letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .kpi-value.green  { color: var(--green); }
+    .kpi-value.red    { color: var(--red); }
+    .kpi-value.blue   { color: var(--accent); }
+    .kpi-value.purple { color: #a78bfa; }
+    .kpi-value.amber  { color: var(--amber); }
+    .kpi-sub {
+      font-size: 0.75rem; color: var(--muted); margin-top: 6px;
+    }
+    .kpi-icon {
+      position: absolute; top: 18px; right: 18px;
+      font-size: 1.6rem; opacity: 0.18;
+    }
+
+    /* ── SECTION HEADERS ── */
+    .section-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .section-header h2 {
+      font-size: 1rem; font-weight: 700; letter-spacing: -0.01em;
+    }
+    .section-divider {
+      flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── CHARTS ROW ── */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 900px) { .charts-row { grid-template-columns: 1fr; } }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .chart-card h3 {
+      font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--muted); margin-bottom: 16px;
+    }
+    .chart-wrap { position: relative; height: 200px; }
+
+    /* ── LIQUIDITY BAR ── */
+    .liq-bar-wrap { margin-bottom: 28px; }
+    .liq-bar-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .liq-bar-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 14px;
+    }
+    .liq-bar-header h3 {
+      font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--muted);
+    }
+    .liq-amounts { display: flex; gap: 20px; }
+    .liq-amt { font-size: 0.8rem; }
+    .liq-amt span { font-weight: 700; }
+    .bar-track {
+      background: rgba(255,255,255,0.06);
+      border-radius: 8px; height: 22px; overflow: hidden;
+      position: relative;
+    }
+    .bar-fill {
+      height: 100%; border-radius: 8px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+      display: flex; align-items: center; justify-content: flex-end;
+      padding-right: 10px;
+    }
+    .bar-fill span { font-size: 0.72rem; font-weight: 700; color: #fff; }
+    .bar-remaining {
+      position: absolute; top: 0; right: 0; height: 100%;
+      display: flex; align-items: center; padding-right: 10px;
+      font-size: 0.72rem; color: var(--muted);
+    }
+
+    /* ── ROUTING TABLE ── */
+    .table-wrap { margin-bottom: 28px; overflow-x: auto; }
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .table-toolbar {
+      padding: 16px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap; gap: 10px;
+    }
+    .table-toolbar h3 { font-size: 0.9rem; font-weight: 700; }
+    .filter-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+    .filter-btn {
+      padding: 4px 12px; border-radius: 20px; font-size: 0.72rem;
+      font-weight: 600; cursor: pointer; border: 1px solid var(--border);
+      background: transparent; color: var(--muted);
+      transition: all 0.15s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--accent); color: #000; border-color: var(--accent);
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    thead tr { background: var(--surface2); }
+    th {
+      padding: 11px 16px; text-align: left;
+      font-size: 0.72rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 13px 16px; font-size: 0.83rem;
+      border-bottom: 1px solid rgba(30,58,95,0.5);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background 0.12s; }
+    tbody tr:hover { background: rgba(0,212,255,0.04); }
+    .inv-ref { font-family: monospace; font-size: 0.8rem; color: var(--accent); font-weight: 600; }
+    .vendor { font-weight: 600; }
+    .amount { font-weight: 700; font-variant-numeric: tabular-nums; }
+    .penalty-val { font-variant-numeric: tabular-nums; }
+    .penalty-high { color: var(--red); font-weight: 700; }
+    .penalty-med  { color: var(--amber); font-weight: 600; }
+    .penalty-low  { color: var(--muted); }
+    .rail-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 700; white-space: nowrap;
+    }
+    .rail-usdc    { background: rgba(0,212,255,0.12); color: var(--accent); border: 1px solid rgba(0,212,255,0.25); }
+    .rail-swift   { background: rgba(16,185,129,0.1); color: var(--green); border: 1px solid rgba(16,185,129,0.25); }
+    .rail-deferred{ background: rgba(245,158,11,0.1); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); }
+    .network-tag {
+      font-size: 0.7rem; font-family: monospace;
+      color: var(--muted); background: rgba(255,255,255,0.04);
+      padding: 2px 7px; border-radius: 4px;
+    }
+    .queue-tag { font-size: 0.75rem; color: var(--muted); }
+    .priority-urgent  { color: var(--red); font-weight: 700; font-size: 0.72rem; }
+    .priority-standard{ color: var(--muted); font-size: 0.72rem; }
+
+    /* ── GAS CHECK PANEL ── */
+    .gas-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    }
+    .gas-icon { font-size: 2rem; }
+    .gas-info { flex: 1; }
+    .gas-info h3 { font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; }
+    .gas-info p  { font-size: 0.78rem; color: var(--muted); }
+    .gas-meter {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 20px;
+    }
+    .gas-meter-val { font-size: 1.4rem; font-weight: 800; color: var(--green); }
+    .gas-meter-label { font-size: 0.72rem; color: var(--muted); }
+    .gas-meter-check { font-size: 1.2rem; }
+
+    /* ── MANDATE PANEL ── */
+    .mandate-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px; margin-bottom: 28px;
+    }
+    .mandate-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 18px;
+    }
+    .mandate-card h4 {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--muted); margin-bottom: 8px;
+    }
+    .mandate-card p { font-size: 0.82rem; line-height: 1.5; }
+    .mandate-card code {
+      background: rgba(0,212,255,0.08); color: var(--accent);
+      padding: 1px 6px; border-radius: 4px; font-size: 0.78rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center; padding: 24px 40px 0;
+      font-size: 0.72rem; color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+    .live-dot {
+      display: inline-block; width: 7px; height: 7px;
+      background: var(--green); border-radius: 50%;
+      animation: pulse-dot 1.6s ease-in-out infinite;
+      margin-right: 5px;
+    }
+
+    /* ── HIDDEN ROWS ── */
+    tr.hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════ HEADER -->
+<header>
+  <div class="header-left">
+    <div class="logo">T0</div>
+    <div class="header-title">
+      <h1>T-Zero Autonomous Treasury Router</h1>
+      <p>Policy: AP2-WKND-LIQ-003 &nbsp;|&nbsp; Friday Legacy SWIFT Blackout Response</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="badge badge-red">⚠ SWIFT Blackout Active</span>
+    <span class="badge badge-green"><span class="live-dot"></span>Fireblocks Live</span>
+    <span class="badge badge-blue">Base Gas ✓ $0.001</span>
+    <span class="timestamp" id="ts"></span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ═══════════════════════════════════════════════════════ ALERT BANNER -->
+  <div class="alert">
+    <span class="alert-icon">🚨</span>
+    <div>
+      <strong>BLACKOUT WINDOW ACTIVE</strong> — JPMorgan New York Nostro ($18,500,000 USD) is locked until Monday 08:00 EST.
+      Digital liquidity (Fireblocks USDC) is the sole available settlement rail for urgent payments this weekend.
+      Knapsack optimiser executed: 2 payments routed via stablecoin, 2 queued for Monday SWIFT.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ KPI CARDS -->
+  <div class="kpi-grid">
+    <div class="kpi-card green">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-label">Total Penalty Cost Saved</div>
+      <div class="kpi-value green">$100,542</div>
+      <div class="kpi-sub">By paying 2 urgent invoices via USDC on-time</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-icon">⚠️</div>
+      <div class="kpi-label">Penalty Cost Incurred</div>
+      <div class="kpi-value red">$56,000</div>
+      <div class="kpi-sub">LatAm Copper Co. — deferred (lowest-impact drop)</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-icon">⛓</div>
+      <div class="kpi-label">Payments via Stablecoin</div>
+      <div class="kpi-value blue">2</div>
+      <div class="kpi-sub">$3,302,000 USDC routed via Base network</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-icon">🏦</div>
+      <div class="kpi-label">Payments Queued for TradFi</div>
+      <div class="kpi-value purple">2</div>
+      <div class="kpi-sub">$8,800,000 queued for Monday 08:00 EST SWIFT</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-icon">🔋</div>
+      <div class="kpi-label">Digital Liquidity Used</div>
+      <div class="kpi-value amber">82.6%</div>
+      <div class="kpi-sub">$3,302,000 of $4,000,000 cap consumed</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ CHARTS -->
+  <div class="section-header">
+    <h2>Analytics</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="charts-row">
+    <div class="chart-card">
+      <h3>Penalty Outcome (USD)</h3>
+      <div class="chart-wrap">
+        <canvas id="penaltyChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Payment Rail Distribution</h3>
+      <div class="chart-wrap">
+        <canvas id="railChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Digital Liquidity Utilisation</h3>
+      <div class="chart-wrap">
+        <canvas id="liqChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ LIQUIDITY PROGRESS BAR -->
+  <div class="liq-bar-wrap">
+    <div class="liq-bar-card">
+      <div class="liq-bar-header">
+        <h3>Fireblocks USDC Wallet — Digital Liquidity Consumption</h3>
+        <div class="liq-amounts">
+          <div class="liq-amt">Used: <span style="color:var(--accent)">$3,302,000</span></div>
+          <div class="liq-amt">Remaining: <span style="color:var(--green)">$698,000</span></div>
+          <div class="liq-amt">Cap: <span>$4,000,000</span></div>
+        </div>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" id="liqBarFill" style="width:0%">
+          <span>$3,302,000 used</span>
+        </div>
+        <div class="bar-remaining">$698K remaining</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ GAS CHECK -->
+  <div class="section-header">
+    <h2>Live Gas Validation — Base Network</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="gas-panel">
+    <div class="gas-icon">⛽</div>
+    <div class="gas-info">
+      <h3>BaseScan Live Gas Check — Passed</h3>
+      <p>Source: basescan.org/gastracker &nbsp;|&nbsp; Checked: Sun 05 Apr 2026, 20:17 UTC &nbsp;|&nbsp;
+         Network: Base Mainnet &nbsp;|&nbsp; Block: 44,315,462 &nbsp;|&nbsp; Avg Utilisation: 10.49%</p>
+      <p style="margin-top:6px;">AP2 Mandate constraint: <code style="background:rgba(0,212,255,0.08);color:var(--accent);padding:1px 6px;border-radius:4px;font-size:0.78rem;">max_acceptable_network_gas_usd = $50.00</code> &nbsp;|&nbsp;
+         Ethereum Mainnet: <span style="color:var(--red);font-weight:700;">PROHIBITED</span> for SE Asia per AP2 routing constraints</p>
+    </div>
+    <div class="gas-meter">
+      <div>
+        <div class="gas-meter-val">$0.001</div>
+        <div class="gas-meter-label">ERC-20 Transfer (USDC)</div>
+        <div class="gas-meter-label">0.005 Gwei &nbsp;|&nbsp; Base L2</div>
+      </div>
+      <div class="gas-meter-check">✅</div>
+    </div>
+    <div class="gas-meter" style="border-color:rgba(239,68,68,0.3);">
+      <div>
+        <div class="gas-meter-val" style="color:var(--red);">$5.48</div>
+        <div class="gas-meter-label">Ethereum Mainnet (swap)</div>
+        <div class="gas-meter-label">PROHIBITED — SE Asia rule</div>
+      </div>
+      <div class="gas-meter-check">🚫</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ ROUTING TABLE -->
+  <div class="section-header">
+    <h2>SAP S/4 Reconciliation — Payment Routing Table</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="table-wrap">
+    <div class="table-card">
+      <div class="table-toolbar">
+        <h3>All Payments (4 invoices)</h3>
+        <div class="filter-btns">
+          <button class="filter-btn active" onclick="filterTable('all', this)">All</button>
+          <button class="filter-btn" onclick="filterTable('stablecoin', this)">Stablecoin</button>
+          <button class="filter-btn" onclick="filterTable('tradfi', this)">TradFi SWIFT</button>
+          <button class="filter-btn" onclick="filterTable('deferred', this)">Deferred</button>
+        </div>
+      </div>
+      <table id="routingTable">
+        <thead>
+          <tr>
+            <th>Invoice Ref</th>
+            <th>Vendor</th>
+            <th>Amount (USD)</th>
+            <th>Penalty (USD)</th>
+            <th>Priority</th>
+            <th>Destination</th>
+            <th>Rail</th>
+            <th>Network</th>
+            <th>Queue / Execution</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Rows injected by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ MANDATE SUMMARY -->
+  <div class="section-header">
+    <h2>AP2 Mandate Compliance Summary</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="mandate-grid">
+    <div class="mandate-card">
+      <h4>Policy</h4>
+      <p>ID: <code>AP2-WKND-LIQ-003</code><br/>
+         Blackout: <code>Friday 16:00 EST → Monday 08:00 EST</code><br/>
+         Digital Cap: <code>$4,000,000 USDC</code></p>
+    </div>
+    <div class="mandate-card">
+      <h4>Knapsack Decision</h4>
+      <p>3 urgent payments totalling <code>$6,102,000</code> exceeded the $4M cap by <code>$2,102,000</code>.
+         Exact subset enumeration selected the combination maximising penalty savings.
+         <strong style="color:var(--amber)">LatAm Copper Co.</strong> dropped (lowest penalty density: $56K on $2.8M).</p>
+    </div>
+    <div class="mandate-card">
+      <h4>SE Asia Routing</h4>
+      <p>Countries: <code>Singapore, Taiwan, Vietnam</code><br/>
+         Allowed: <code>Base, Solana</code><br/>
+         Prohibited: <code>Ethereum_Mainnet</code><br/>
+         INV-88301 (Singapore) → <code>Base</code> ✅</p>
+    </div>
+    <div class="mandate-card">
+      <h4>TradFi Fallback</h4>
+      <p>INV-88304 (Global Tech Supply, Taiwan) has <code>Priority: STANDARD</code> and <code>Penalty: None</code>.
+         Enforcing <code>default_rail_preference: TradFi_SWIFT</code>. No digital liquidity consumed.</p>
+    </div>
+    <div class="mandate-card">
+      <h4>Stablecoin Trigger</h4>
+      <p>Condition met: TradFi blackout causes missed Value Date AND penalty exceeds gas fee ($0.001).
+         Both INV-88301 ($100K penalty) and INV-88302 ($542.50 penalty) qualify.</p>
+    </div>
+    <div class="mandate-card">
+      <h4>Optimisation Goal</h4>
+      <p>Goal: <code>Minimize_Total_Penalty_Cost</code><br/>
+         Penalty saved: <strong style="color:var(--green)">$100,542.50</strong><br/>
+         Penalty incurred: <strong style="color:var(--red)">$56,000.00</strong><br/>
+         Net outcome: <strong style="color:var(--green)">+$44,542.50 better</strong> than worst case</p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  T-Zero Autonomous Treasury Router &nbsp;|&nbsp; Policy AP2-WKND-LIQ-003 &nbsp;|&nbsp;
+  Generated: <span id="footerTs"></span> &nbsp;|&nbsp;
+  Data sources: AP_Run_V3.csv · Treasury_Positions-2.xlsx · AP2_Mandate_V3.json · BaseScan live gas feed
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════════ SCRIPTS -->
+<script>
+  // ── Timestamp
+  const now = new Date();
+  const fmt = d => d.toLocaleString('en-GB', {
+    weekday:'short', day:'2-digit', month:'short', year:'numeric',
+    hour:'2-digit', minute:'2-digit', timeZoneName:'short'
+  });
+  document.getElementById('ts').textContent = fmt(now);
+  document.getElementById('footerTs').textContent = fmt(now);
+
+  // ── Data
+  const routingData = [
+    { ref:'INV-88301', vendor:'Apex Logistics APAC', amount:2000000, penalty:100000,
+      priority:'URGENT', country:'Singapore', rail:'Stablecoin_USDC',
+      network:'Base', queue:'Immediate 24/7' },
+    { ref:'INV-88302', vendor:'AWS Frankfurt', amount:1302000, penalty:542.5,
+      priority:'URGENT', country:'Germany', rail:'Stablecoin_USDC',
+      network:'Base', queue:'Immediate 24/7' },
+    { ref:'INV-88303', vendor:'LatAm Copper Co.', amount:2800000, penalty:56000,
+      priority:'URGENT', country:'Brazil', rail:'DEFERRED_SWIFT',
+      network:'SWIFT_GPI', queue:'Monday 08:00 EST' },
+    { ref:'INV-88304', vendor:'Global Tech Supply', amount:6000000, penalty:0,
+      priority:'STANDARD', country:'Taiwan', rail:'TradFi_SWIFT',
+      network:'SWIFT_GPI', queue:'Monday 08:00 EST' },
+  ];
+
+  // ── Build table
+  const tbody = document.getElementById('tableBody');
+  routingData.forEach(r => {
+    const railClass = r.rail === 'Stablecoin_USDC' ? 'rail-usdc'
+                    : r.rail === 'TradFi_SWIFT'    ? 'rail-swift'
+                    : 'rail-deferred';
+    const railLabel = r.rail === 'Stablecoin_USDC' ? '⛓ USDC Stablecoin'
+                    : r.rail === 'TradFi_SWIFT'    ? '🏦 TradFi SWIFT'
+                    : '⏸ Deferred SWIFT';
+    const penClass  = r.penalty >= 50000 ? 'penalty-high'
+                    : r.penalty >= 500   ? 'penalty-med'
+                    : 'penalty-low';
+    const penFmt    = r.penalty === 0 ? '—'
+                    : '$' + r.penalty.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const railType  = r.rail === 'Stablecoin_USDC' ? 'stablecoin'
+                    : r.rail === 'TradFi_SWIFT'    ? 'tradfi'
+                    : 'deferred';
+    const tr = document.createElement('tr');
+    tr.dataset.rail = railType;
+    tr.innerHTML = `
+      <td><span class="inv-ref">${r.ref}</span></td>
+      <td><span class="vendor">${r.vendor}</span></td>
+      <td class="amount">$${r.amount.toLocaleString('en-US')}</td>
+      <td class="penalty-val ${penClass}">${penFmt}</td>
+      <td><span class="${r.priority === 'URGENT' ? 'priority-urgent' : 'priority-standard'}">${r.priority}</span></td>
+      <td>${r.country}</td>
+      <td><span class="rail-pill ${railClass}">${railLabel}</span></td>
+      <td><span class="network-tag">${r.network}</span></td>
+      <td class="queue-tag">${r.queue}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // ── Table filter
+  function filterTable(type, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('#tableBody tr').forEach(tr => {
+      tr.classList.toggle('hidden', type !== 'all' && tr.dataset.rail !== type);
+    });
+  }
+
+  // ── Chart defaults
+  Chart.defaults.color = '#64748b';
+  Chart.defaults.font.family = "'Inter','Segoe UI',system-ui,sans-serif";
+
+  // ── Penalty Outcome Chart (bar)
+  new Chart(document.getElementById('penaltyChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Penalty Saved', 'Penalty Incurred'],
+      datasets: [{
+        data: [100542.5, 56000],
+        backgroundColor: ['rgba(16,185,129,0.7)', 'rgba(239,68,68,0.7)'],
+        borderColor:     ['#10b981', '#ef4444'],
+        borderWidth: 1.5,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ' $' + ctx.raw.toLocaleString('en-US', {minimumFractionDigits:2}) } }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(30,58,95,0.5)' }, ticks: { font: { size: 11 } } },
+        y: { grid: { color: 'rgba(30,58,95,0.5)' },
+             ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'K', font: { size: 10 } } }
+      }
+    }
+  });
+
+  // ── Rail Distribution Chart (doughnut)
+  new Chart(document.getElementById('railChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Stablecoin USDC', 'TradFi SWIFT', 'Deferred SWIFT'],
+      datasets: [{
+        data: [3302000, 6000000, 2800000],
+        backgroundColor: ['rgba(0,212,255,0.7)', 'rgba(16,185,129,0.7)', 'rgba(245,158,11,0.7)'],
+        borderColor:     ['#00d4ff', '#10b981', '#f59e0b'],
+        borderWidth: 1.5,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 10, boxWidth: 12 } },
+        tooltip: { callbacks: { label: ctx => ' $' + ctx.raw.toLocaleString('en-US') } }
+      }
+    }
+  });
+
+  // ── Liquidity Utilisation Chart (doughnut)
+  new Chart(document.getElementById('liqChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Used (INV-88301)', 'Used (INV-88302)', 'Remaining'],
+      datasets: [{
+        data: [2000000, 1302000, 698000],
+        backgroundColor: ['rgba(124,58,237,0.7)', 'rgba(0,212,255,0.6)', 'rgba(255,255,255,0.07)'],
+        borderColor:     ['#7c3aed', '#00d4ff', 'rgba(255,255,255,0.1)'],
+        borderWidth: 1.5,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 10, boxWidth: 12 } },
+        tooltip: { callbacks: { label: ctx => ' $' + ctx.raw.toLocaleString('en-US') } }
+      }
+    }
+  });
+
+  // ── Animate liquidity bar
+  setTimeout(() => {
+    document.getElementById('liqBarFill').style.width = '82.55%';
+  }, 300);
+</script>
+</body>
+</html>

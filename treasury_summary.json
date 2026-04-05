@@ -1,0 +1,61 @@
+{
+  "total_penalty_saved_usd": 100542.5,
+  "total_penalty_incurred_usd": 56000.0,
+  "payments_stablecoin_count": 2,
+  "payments_stablecoin_total_usd": 3302000.0,
+  "payments_tradfi_count": 2,
+  "payments_tradfi_total_usd": 8800000.0,
+  "payments_deferred_count": 1,
+  "digital_cap_usd": 4000000.0,
+  "digital_used_usd": 3302000.0,
+  "digital_remaining_usd": 698000.0,
+  "live_gas_usd": 0.001,
+  "gas_threshold_usd": 50.0,
+  "gas_check_passed": true,
+  "routing_table": [
+    {
+      "Invoice_Ref": "INV-88301",
+      "Vendor_Name": "Apex Logistics APAC",
+      "Amount_USD": 2000000.0,
+      "Penalty_USD": 100000.0,
+      "Rail": "Stablecoin_USDC",
+      "Network": "Base",
+      "Queue_Time": "Immediate_24/7",
+      "Priority": "URGENT",
+      "Dest_Country": "Singapore"
+    },
+    {
+      "Invoice_Ref": "INV-88302",
+      "Vendor_Name": "AWS Frankfurt",
+      "Amount_USD": 1302000.0,
+      "Penalty_USD": 542.5,
+      "Rail": "Stablecoin_USDC",
+      "Network": "Base",
+      "Queue_Time": "Immediate_24/7",
+      "Priority": "URGENT",
+      "Dest_Country": "Germany"
+    },
+    {
+      "Invoice_Ref": "INV-88303",
+      "Vendor_Name": "LatAm Copper Co.",
+      "Amount_USD": 2800000.0,
+      "Penalty_USD": 56000.0,
+      "Rail": "DEFERRED_SWIFT",
+      "Network": "SWIFT_GPI",
+      "Queue_Time": "Monday_08:00_EST",
+      "Priority": "URGENT",
+      "Dest_Country": "Brazil"
+    },
+    {
+      "Invoice_Ref": "INV-88304",
+      "Vendor_Name": "Global Tech Supply",
+      "Amount_USD": 6000000.0,
+      "Penalty_USD": 0.0,
+      "Rail": "TradFi_SWIFT",
+      "Network": "SWIFT_GPI",
+      "Queue_Time": "Monday_08:00_EST",
+      "Priority": "STANDARD",
+      "Dest_Country": "Taiwan"
+    }
+  ]
+}

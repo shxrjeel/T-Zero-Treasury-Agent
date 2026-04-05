@@ -1,0 +1,5 @@
+Invoice_Ref,Vendor_Name,Amount,Ccy,Amount_USD,Dest_Country,Value_Date,Priority,Penalty_Clause,Penalty_USD,Rail,Network,Queue_Time,Notes
+INV-88301,Apex Logistics APAC,2000000,USD,2000000,Singapore,2026-03-28,URGENT,5%_Loss_of_Discount,100000.00,Stablecoin_USDC,Base,Immediate_24/7,SE Asia jurisdiction; Base gas $0.0010 within $50 threshold; Ethereum_Mainnet prohibited per AP2 mandate
+INV-88302,AWS Frankfurt,1200000,EUR,1302000.00,Germany,2026-03-29,URGENT,Flat_Fee_500_EUR,542.50,Stablecoin_USDC,Base,Immediate_24/7,URGENT; TradFi blackout active; stablecoin trigger condition met per AP2 mandate
+INV-88303,LatAm Copper Co.,2800000,USD,2800000,Brazil,2026-03-28,URGENT,2%_Late_Fee,56000.00,DEFERRED_SWIFT,SWIFT_GPI,Monday_08:00_EST,Dropped by knapsack optimiser — lowest penalty impact; SWIFT Monday queue
+INV-88304,Global Tech Supply,6000000,USD,6000000,Taiwan,2026-03-30,STANDARD,None,0,TradFi_SWIFT,SWIFT_GPI,Monday_08:00_EST,No penalty; default_rail_preference enforced per AP2 mandate

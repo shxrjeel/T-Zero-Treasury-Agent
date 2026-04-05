@@ -1,0 +1,23 @@
+{
+  "policy_id": "AP2-WKND-LIQ-003",
+  "digital_liquidity_cap_usd": 4000000,
+  "rules": {
+    "legacy_blackout_windows": {
+      "start": "Friday 16:00 EST",
+      "end": "Monday 08:00 EST"
+    },
+    "routing_constraints": {
+      "SE_Asia": {
+        "countries": ["Singapore", "Taiwan", "Vietnam"],
+        "allowed_networks": ["Base", "Solana"],
+        "prohibited_networks": ["Ethereum_Mainnet"]
+      }
+    },
+    "execution_thresholds": {
+      "default_rail_preference": "TradFi_SWIFT",
+      "stablecoin_trigger": "Only route via digital assets if TradFi blackout causes a missed Value Date AND the resulting Penalty Clause exceeds the network gas fee.",
+      "optimization_goal": "Minimize_Total_Penalty_Cost",
+      "max_acceptable_network_gas_usd": 50
+    }
+  }
+}
